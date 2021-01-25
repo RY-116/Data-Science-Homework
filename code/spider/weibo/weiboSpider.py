@@ -5,6 +5,7 @@ import random
 
 
 def get_content(str):
+    # 用于获得内含标签的str中的纯文本
     ans = ""
     write = False
     count = 0
@@ -21,33 +22,37 @@ def get_content(str):
     return ans
 
 
-PROXY_POOL_URL = 'http://localhost:5555/random'
+PROXY_POOL_URL = 'http://127.0.0.1:5555/random'
 
 
 def get_proxy():
+    # 获取ip代理
     try:
         response = requests.get(PROXY_POOL_URL)
         if response.status_code == 200:
-            return response.text
+            return response.text.strip()
     except ConnectionError:
         return None
 
-
+# 搜索结果所在网址
 base_url = 'https://weibo.cn/search/mblog?hideSearchFrame=&keyword=%E7%96%AB%E6%83%85&advancedfilter=1&hasori=1&starttime=20200310&endtime=20200630&sort=time&page='
 head = {
     'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
     'cookie': '_T_WM=71345515258; SCF=Aqde6NoTDhsEfl8BJwQI0Z5vgtEA7CtnP64n-cbOfSrhZGWfRsM1x_sFlXR-UOz-5RW39QwcA9Ej_8s6wbVnTLg.; SUB=_2A25NCGUqDeRhGeBP6VEQ9CrIzDqIHXVu8wtirDV6PUJbktANLUzakW1NRX8UHFN3Jey8SxqcHqtLDGi4HmQte34B; SUBP=0033WrSXqPxfM725Ws9jqgMF55529P9D9WhseaBECl4pMTT9KQMmhDS95NHD95QceKz0eKBXShMcWs4DqcjsMrSr9NSr',
     'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.141 Safari/537.36'
 }
+proxies = {
+    'http': 'http://' + get_proxy()
+}
 
-filename = 'weibo.txt'
+filename = 'weibo.txt' # 存放爬取结果
 start_page = 1
 end_page = 267
 error_count = 0
 
 for i in range(start_page, end_page):
     real_url = base_url + str(i)
-    r = requests.get(real_url, headers=head, proxies=get_proxy())
+    r = requests.get(real_url, headers=head, proxies=proxies)
     r.raise_for_status()
     r.encoding = r.apparent_encoding
 

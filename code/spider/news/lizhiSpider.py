@@ -5,6 +5,7 @@ import random
 
 
 def get_content(str):
+    # 用于获得内含标签的str中的纯文本
     ans = ""
     write = False
     for i in str:
@@ -18,32 +19,36 @@ def get_content(str):
     return ans
 
 
-PROXY_POOL_URL = 'http://localhost:5555/random'
+PROXY_POOL_URL = 'http://127.0.0.1:5555/random'
 
 
 def get_proxy():
+    # 获取ip代理
     try:
         response = requests.get(PROXY_POOL_URL)
         if response.status_code == 200:
-            return response.text
+            return response.text.strip()
     except ConnectionError:
         return None
 
 
-base_url = 'https://so.jstv.com/?keyword=%E7%96%AB%E6%83%85&page='
+base_url = 'https://so.jstv.com/?keyword=%E7%96%AB%E6%83%85&page=' # 搜索结果所在网址
 head = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.116 Safari/537.36'
 }
+proxies = {
+    'http': 'http://' + get_proxy()
+}
 
 
-filename = 'lizhinews.txt'
+filename = 'lizhinews.txt' # 存放爬取结果
 start_page = 19
 end_page = 3715
 error_count = 0
 
 for i in range(start_page, end_page + 1):
     real_url = base_url + str(i)
-    r = requests.get(real_url, headers=head)
+    r = requests.get(real_url, headers=head, proxies=proxies)
     r.raise_for_status()
     r.encoding = r.apparent_encoding
 
